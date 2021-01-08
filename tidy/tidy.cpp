@@ -216,13 +216,14 @@ void Close()
 DWORD CreateAppProcess(LPWSTR commandLine)
 {
     startupInfo.cb = sizeof(STARTUPINFO);
+    
     BOOL result = CreateProcessW(
         nullptr,
         commandLine,
         nullptr,
         nullptr,
         FALSE,
-        CREATE_NEW_PROCESS_GROUP,
+        0,
         nullptr,
         nullptr,
         &startupInfo, &processInfo
@@ -245,17 +246,21 @@ DWORD CreateAppProcess(LPWSTR commandLine)
             LONG idChild,
             DWORD dwEventThread,
             DWORD dwmsEventTime) {
-        if (idObject == OBJID_WINDOW && idChild == CHILDID_SELF)
-        {
-            // hide target app
-            HideAppWindow(processInfo.dwThreadId);
-        }},
-        processInfo.dwProcessId,
-        processInfo.dwThreadId,
-        WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS
+                DWORD pid = 0;
+                ::GetWindowThreadProcessId(hwnd, &pid);
+                //if (idObject == OBJID_WINDOW && idChild == CHILDID_SELF)
+                if (processInfo.dwProcessId == pid)
+                {
+                    // hide target app
+                    HideAppWindow(processInfo.dwThreadId);
+                }},
+        0, //processInfo.dwProcessId,
+        0, //processInfo.dwThreadId,
+        WINEVENT_OUTOFCONTEXT | WINEVENT_SKIPOWNPROCESS /*| WINEVENT_SKIPOWNTHREAD*/
     );
     if (!winEventHook)
     {
+        auto le = GetLastError();
         std::clog << "SetWinEventHook failed" << std::endl;
         return 1;
     }
