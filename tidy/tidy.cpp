@@ -117,7 +117,7 @@ BOOL Init(HINSTANCE hInstance, int nCmdShow, LPWSTR commandLine)
        WINDOW_CLASS_NAME,
        L"tidy-window",
        WS_OVERLAPPEDWINDOW,
-       CW_USEDEFAULT,   // x
+       0,               // x
        0,               // y
        0,               // width
        0,               // height
